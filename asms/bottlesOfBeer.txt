@@ -1,0 +1,129 @@
+param variableLength 2;
+param pointerLength 2;
+
+param stringType NULL_TERMINATED;
+
+macro icmp [a b c] {
+	icmp;
+	adv2 [jumps + 2];
+	jump;
+
+	define-list2 jumps a b c;
+};
+
+macro icmp [a b] {
+	icmp;
+	adv2 [jumps + 2];
+	jump;
+
+	define-list2 jumps a b a;
+};
+
+function toString 1 {
+	dup;
+	push 10;
+	icmp single moreThan moreThan;
+
+	define single {
+		iadd '0;
+		put;
+		jump;
+	};
+
+	define moreThan {
+		dup;
+		idiv 10;
+		iadd '0;
+		put;
+		imod 10;
+		iadd '0;
+		put;
+		jump;
+	};
+};
+
+function print 1 {
+	dup;
+	get1;
+	dup;
+	push 0;
+	icmp cont {
+		pop;
+		pop;
+		jump;
+	} cont;
+
+	define cont {
+		put;
+		iinc;
+
+		jump print;
+	};
+};
+
+push 99;
+define start;
+
+define bob " bottles of beer on the wall";
+define bobs " bottle of beer on the wall";
+
+toString;
+dup;
+push 1;
+icmp {
+	push BLOCK_END;
+	push bob;
+	jump print;
+} {
+	print bobs;
+};
+put ',;
+put ';
+toString;
+print " bottle";
+dup;
+push 1;
+icmp {
+	put 's;
+} .;
+print " of beer.\nTake one down and pass it around, ";
+idec;
+dup;
+push 0;
+icmp . {
+	push end;
+	push bob;
+	push print;
+	push ", no more bottles of beer.\nGo to the store and buy some more, 99";
+	push print;
+	push bob;
+	push print;
+	push ".\n\nNo more";
+	push print;
+	push bob;
+	push print;
+	push "no more";
+	jump print;
+
+	define end;
+	put '.;
+	nop;
+} {
+	toString;
+	dup;
+	push 1;
+	icmp {
+		push BLOCK_END;
+		push bob;
+		jump print;
+	} {
+		print bobs;
+	};
+
+	put '.;
+	push '\n;
+	dup;
+	put;
+	put;
+	jump start;
+};

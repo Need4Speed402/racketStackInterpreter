@@ -1,0 +1,99 @@
+param variableLength 1;
+param pointerLength 1;
+
+param stringType NULL_TERMINATED;
+
+macro icmp [a b c] {
+	icmp;
+	adv1 [jumps + 1];
+	jump;
+
+	define-list1 jumps a b c;
+};
+
+function copy 2 {
+	down 2;
+	get1;
+	push 0;
+	icmp valid breakOut valid;
+
+	define valid {
+		down 2;
+		get1;
+		down 2;
+		put1;
+
+		iinc;
+		down 2;
+		iinc;
+		up 2;
+
+		jump copy;
+	};
+
+	define breakOut {
+		pop;
+		pop;
+		jump;
+	};
+};
+
+// we are going to write the lookup table after the code,
+// which is the pointer + 1 of the last most instruction
+define lookup ASM_END;
+
+// create the lookup table starting at 0
+push 0;
+define tableSetup {
+	//count up to 256
+	dup;
+	push 256;
+	icmp {
+		//write the value to memory
+		dup;
+		dup;
+		iadd lookup;
+		put1;
+
+		// increment by 1
+		iinc;
+
+		jump tableSetup;
+	} . .;
+
+	pop;
+};
+
+
+{
+	//temporary reset variableLength to 2 bytes.
+	// lookup + 'Z seems to overflow one byte.
+	param variableLength 2;
+
+	put1 0 [lookup + 'Z + 1];
+	copy [lookup + 'A] [lookup + 'a];
+	put1 ['Z + 1] [lookup + 'Z + 1];
+
+	copy "**********" [lookup + '0];	
+}
+
+//main loop
+define mainLoop {
+	//get a byte from the input
+	get;
+
+	//break the loop if the input byte was 0
+	dup;
+	push 0;
+	icmp . . {
+		// offset the input byte by the address of the first byte in the lookup table
+		// and get the byte from memory.
+		iadd lookup;
+		get1;
+
+		//output the result
+		put;
+
+		jump mainLoop;
+	};
+};

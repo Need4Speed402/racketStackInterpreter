@@ -1,0 +1,27 @@
+param variableLength 1;
+param pointerLength 1;
+
+macro icmp [b c] {
+	icmp;
+	adv1 [jumps + 1];
+	jump;
+
+	define-list1 jumps b c;
+};
+
+push 1;
+define start;
+
+dup;
+push 10;
+icmp {
+	dup;
+	iadd '0;
+	put;
+	put '\n;
+	iinc;
+	jump start;	
+} {
+	put '1;
+	put '0;
+};

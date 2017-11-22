@@ -1,0 +1,53 @@
+param variableLength 1;
+param pointerLength 1;
+
+macro icmp [b c] {
+	icmp;
+	adv1 [jumps + 1];
+	jump;
+
+	define-list1 jumps b c c;
+};
+
+macro icmp [a b c] {
+	icmp;
+	adv1 [jumps + 1];
+	jump;
+
+	define-list1 jumps a b c;
+};
+
+function toString 1 {
+	dup;
+	push 0;
+
+	icmp . {
+		pop;
+		jump;
+	} {
+		push return;
+		down 2;
+		idiv 10;
+		jump toString;
+
+		define return;
+		imod 10;
+		iadd '0;
+		put;
+		jump;
+	};
+};
+
+push 1;
+
+define start;
+
+dup;
+push 0;
+icmp . {
+	toString;
+	put '\n;
+	shl 1;
+
+	jump start;
+};
